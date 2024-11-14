@@ -55,6 +55,14 @@ namespace ZoomNet.Utilities
 		/// <param name="request">The HTTP request.</param>
 		public void OnRequest(IRequest request)
 		{
+			if (string.Equals(request.Message.RequestUri.AbsoluteUri, "https://zoom.us/oauth/revoke", StringComparison.OrdinalIgnoreCase))
+			{
+				request.WithBasicAuthentication(_connectionInfo.ClientId, _connectionInfo.ClientSecret);
+				request.Message.RequestUri = new Uri(request.Message.RequestUri.AbsoluteUri + $"?token={Token}");
+
+				return;
+			}
+
 			// Do not overwrite the Authorization header if it is already set.
 			// One example where it's important to preserve the Authorization
 			// header is CloudRecordings.DownloadFileAsync where developers can

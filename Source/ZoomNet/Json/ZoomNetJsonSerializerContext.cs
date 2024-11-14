@@ -229,6 +229,7 @@ namespace ZoomNet.Json
 	[JsonSerializable(typeof(ZoomNet.Models.TelephonyRegionsSettings))]
 	[JsonSerializable(typeof(ZoomNet.Models.TelephonyUserSettings))]
 	[JsonSerializable(typeof(ZoomNet.Models.TimeZones))]
+	[JsonSerializable(typeof(ZoomNet.Models.TokenRevocation))]
 	[JsonSerializable(typeof(ZoomNet.Models.TrackingSource))]
 	[JsonSerializable(typeof(ZoomNet.Models.TspUserSettings))]
 	[JsonSerializable(typeof(ZoomNet.Models.User))]

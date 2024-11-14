@@ -185,6 +185,11 @@ namespace ZoomNet
 		/// </summary>
 		public IGroups Groups { get; private set; }
 
+		/// <summary>
+		/// Gets the resource that allows you to tokens.
+		/// </summary>
+		public IToken Tokens { get; private set; }
+
 		#endregion
 
 		#region CTOR
@@ -293,6 +298,7 @@ namespace ZoomNet
 			Phone = new Phone(_fluentClient);
 			Sms = new Sms(_fluentClient);
 			Groups = new Groups(_fluentClient);
+			Tokens = new Token(_fluentClient);
 		}
 
 		/// <summary>
