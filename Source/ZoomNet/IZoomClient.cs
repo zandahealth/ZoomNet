@@ -132,10 +132,5 @@ namespace ZoomNet
 		/// Gets the resource that allows you to manage groups.
 		/// </summary>
 		IGroups Groups { get; }
-
-		/// <summary>
-		/// Gets the resource that allows you to manage tokens.
-		/// </summary>
-		IToken Tokens { get; }
 	}
 }

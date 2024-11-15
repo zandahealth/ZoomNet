@@ -25,7 +25,7 @@ namespace ZoomNet.Resources
 		public Task<TokenRevocation> RevokeAsync(CancellationToken cancellationToken = default)
 		{
 			return _client
-			.PostAsync($"https://zoom.us/oauth/revoke")
+			.PostAsync("https://zoom.us/oauth/revoke")
 			.WithCancellationToken(cancellationToken)
 				.AsObject<TokenRevocation>();
 		}
