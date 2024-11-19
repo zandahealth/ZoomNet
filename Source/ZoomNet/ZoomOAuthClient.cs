@@ -79,7 +79,7 @@ namespace ZoomNet
 		public Task<TokenRevocation> RevokeAsync(CancellationToken cancellationToken)
 		{
 			return _fluentClient
-				.PostAsync("https://zoom.us/oauth/revoke")
+				.PostAsync("revoke")
 				.WithCancellationToken(cancellationToken)
 				.AsObject<TokenRevocation>();
 		}
