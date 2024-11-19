@@ -1,4 +1,6 @@
-using ZoomNet.Resources;
+using System.Threading;
+using System.Threading.Tasks;
+using ZoomNet.Models;
 
 namespace ZoomNet
 {
@@ -8,8 +10,10 @@ namespace ZoomNet
 	public interface IZoomOAuthClient
 	{
 		/// <summary>
-		/// Gets the resource that allows you to manage tokens.
+		/// To revoke a user's access token.
 		/// </summary>
-		IToken Tokens { get; }
+		/// <param name="cancellationToken">CancellationToken.</param>
+		/// <returns>TokenRevocation object.</returns>
+		Task<TokenRevocation> RevokeAsync(CancellationToken cancellationToken);
 	}
 }

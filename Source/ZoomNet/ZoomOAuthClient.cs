@@ -2,8 +2,10 @@ using Pathoschild.Http.Client;
 using Pathoschild.Http.Client.Extensibility;
 using System;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using ZoomNet.Json;
-using ZoomNet.Resources;
+using ZoomNet.Models;
 using ZoomNet.Utilities;
 
 namespace ZoomNet
@@ -17,11 +19,6 @@ namespace ZoomNet
 
 		private HttpClient _httpClient;
 		private Pathoschild.Http.Client.IClient _fluentClient;
-
-		/// <summary>
-		/// Gets the resource that allows you to manage tokens.
-		/// </summary>
-		public IToken Tokens { get; private set; }
 
 		#region CTOR
 
@@ -57,8 +54,6 @@ namespace ZoomNet
 			}
 
 			_fluentClient.Filters.Add(new ZoomErrorHandler());
-
-			Tokens = new Token(_fluentClient);
 		}
 
 		/// <summary>
@@ -75,6 +70,19 @@ namespace ZoomNet
 		#endregion
 
 		#region PUBLIC METHODS
+
+		/// <summary>
+		/// Revokes the access token of the user.
+		/// </summary>
+		/// <param name="cancellationToken">CancellationToken.</param>
+		/// <returns>TokenRevocation object.</returns>
+		public Task<TokenRevocation> RevokeAsync(CancellationToken cancellationToken)
+		{
+			return _fluentClient
+				.PostAsync("https://zoom.us/oauth/revoke")
+				.WithCancellationToken(cancellationToken)
+				.AsObject<TokenRevocation>();
+		}
 
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
