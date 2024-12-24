@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using ZoomNet.Models;
+using ZoomNet.Models.ChatbotMessage;
 using ZoomNet.Models.Webhooks;
 using ZoomNet.Resources;
 
@@ -350,6 +352,76 @@ namespace ZoomNet
 		public static Task<Webinar> GetAsync(this IWebinars webinarResource, long webinarId, string occurrenceId = null, CancellationToken cancellationToken = default)
 		{
 			return webinarResource.GetAsync(webinarId, occurrenceId, false, cancellationToken);
+		}
+
+		/// <summary>
+		/// Adds user to a group.
+		/// </summary>
+		/// <param name="groupsResource">The group resource.</param>
+		/// <param name="groupId">The ID of the group.</param>
+		/// <param name="emailAddress">An email address of user to add to the group.</param>
+		/// <param name="cancellationToken">The cancellation token.</param>
+		/// <returns>A task representing the operation. The result will be a string representing the ID of the added user.</returns>
+		public static async Task<string> AddUserToGroupAsync(this IGroups groupsResource, string groupId, string emailAddress, CancellationToken cancellationToken = default)
+		{
+			var result = await groupsResource.AddUsersToGroupAsync(groupId, new[] { emailAddress }, cancellationToken).ConfigureAwait(false);
+
+			// We added a single member to a group therefore the array returned from the Zoom API contains a single element
+			return result.Single();
+		}
+
+		/// <summary>
+		/// Determines if the specified scope has been granted.
+		/// </summary>
+		/// <param name="client">The ZoomNet client.</param>
+		/// <param name="scope">The name of the scope.</param>
+		/// <returns>True if the scope has been granted, False otherwise.</returns>
+		/// <remarks>
+		/// The concept of "scopes" only applies to OAuth connections.
+		/// Therefore an exeption will be thrown if you invoke this method while using
+		/// a JWT connection (you shouldn't be using JWT in the first place since this
+		/// type of connection has been deprecated in the Zoom API since September 2023).
+		/// </remarks>
+		public static bool HasPermission(this IZoomClient client, string scope)
+		{
+			return client.HasPermissions(new[] { scope });
+		}
+
+		/// <summary>
+		/// Send a Chatbot message.
+		/// </summary>
+		/// <param name="chatbotResource">The chatbot resource.</param>
+		/// <param name="accountId">The account ID to which the message was sent.</param>
+		/// <param name="toJId">The JID of group channel or user to whom the message should be sent.</param>
+		/// <param name="robotJId">The robot JID.</param>
+		/// <param name="message">The simple text message to send.</param>
+		/// <param name="enableMarkdownSupport">True if the message contains markdown syntax.</param>
+		/// <param name="cancellationToken">The cancellation token.</param>
+		/// <returns>
+		/// The async task.
+		/// </returns>
+		public static Task<ChatbotMessageInformation> SendMessageAsync(this IChatbot chatbotResource, string accountId, string toJId, string robotJId, string message, bool enableMarkdownSupport = false, CancellationToken cancellationToken = default)
+		{
+			return chatbotResource.SendMessageAsync(accountId, toJId, robotJId, new ChatbotContent() { Head = new ChatbotHeader(message) }, enableMarkdownSupport, cancellationToken);
+		}
+
+		/// <summary>
+		/// Edit a Chatbot message.
+		/// </summary>
+		/// <param name="chatbotResource">The chatbot resource.</param>
+		/// <param name="messageId">The message ID of the message to edit.</param>
+		/// <param name="accountId">The account ID to which the message was sent.</param>
+		/// <param name="toJId">The JID of group channel or user to whom the message should be sent.</param>
+		/// <param name="robotJId">The robot JID.</param>
+		/// <param name="message">The simple text message to send.</param>
+		/// <param name="enableMarkdownSupport">True if the message contains markdown syntax.</param>
+		/// <param name="cancellationToken">The cancellation token.</param>
+		/// <returns>
+		/// The async task.
+		/// </returns>
+		public static Task<ChatbotMessageInformation> EditMessageAsync(this IChatbot chatbotResource, string messageId, string accountId, string toJId, string robotJId, string message, bool enableMarkdownSupport = false, CancellationToken cancellationToken = default)
+		{
+			return chatbotResource.EditMessageAsync(messageId, accountId, toJId, robotJId, new ChatbotContent() { Head = new ChatbotHeader(message) }, enableMarkdownSupport, cancellationToken);
 		}
 	}
 }
