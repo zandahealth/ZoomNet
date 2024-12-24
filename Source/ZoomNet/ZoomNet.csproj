@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <PackageReference Include="HttpMultipartParser" Version="8.4.0" />
-    <PackageReference Include="jose-jwt" Version="5.0.0" />
+    <PackageReference Include="jose-jwt" Version="5.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="Pathoschild.Http.FluentClient" Version="4.4.1" />

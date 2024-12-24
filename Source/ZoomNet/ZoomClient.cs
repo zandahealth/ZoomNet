@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Pathoschild.Http.Client;
 using Pathoschild.Http.Client.Extensibility;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -36,7 +38,7 @@ namespace ZoomNet
 		private readonly ILogger _logger;
 
 		private HttpClient _httpClient;
-		private Pathoschild.Http.Client.IClient _fluentClient;
+		private IClient _fluentClient;
 
 		#endregion
 
@@ -64,121 +66,60 @@ namespace ZoomNet
 			}
 		}
 
-		/// <summary>
-		/// Gets the resource which allows you to manage sub accounts.
-		/// </summary>
-		/// <value>
-		/// The accounts resource.
-		/// </value>
+		/// <inheritdoc/>
 		public IAccounts Accounts { get; private set; }
 
-		/// <summary>
-		/// Gets the resource which allows you to manage chat channels, messages, etc.
-		/// </summary>
-		/// <value>
-		/// The chat resource.
-		/// </value>
+		/// <inheritdoc/>
+		public ICallLogs CallLogs { get; private set; }
+
+		/// <inheritdoc/>
 		public IChat Chat { get; private set; }
 
-		/// <summary>
-		/// Gets the resource which allows you to manage cloud recordings.
-		/// </summary>
-		/// <value>
-		/// The recordings resource.
-		/// </value>
+		/// <inheritdoc/>
+		public IChatbot Chatbot { get; private set; }
+
+		/// <inheritdoc/>
 		public ICloudRecordings CloudRecordings { get; private set; }
 
-		/// <summary>
-		/// Gets the resource which allows you to manage contacts.
-		/// </summary>
-		/// <value>
-		/// The contacts resource.
-		/// </value>
+		/// <inheritdoc/>
 		public IContacts Contacts { get; private set; }
 
-		/// <summary>
-		/// Gets the resource which allows you to notify Zoom that you comply with the policy which requires
-		/// you to handle user's data in accordance to the user's preference after the user uninstalls your app.
-		/// </summary>
-		/// <value>
-		/// The data compliance resource.
-		/// </value>
+		/// <inheritdoc/>
+		public IDashboards Dashboards { get; private set; }
+
+		/// <inheritdoc/>
 		[Obsolete("The Data Compliance API is deprecated")]
 		public IDataCompliance DataCompliance { get; private set; }
 
-		/// <summary>
-		/// Gets the resource which allows you to manage meetings.
-		/// </summary>
-		/// <value>
-		/// The meetings resource.
-		/// </value>
+		/// <inheritdoc/>
+		public IGroups Groups { get; private set; }
+
+		/// <inheritdoc/>
 		public IMeetings Meetings { get; private set; }
 
-		/// <summary>
-		/// Gets the resource which allows you to manage meetings that occured in the past.
-		/// </summary>
-		/// <value>
-		/// The past meetings resource.
-		/// </value>
+		/// <inheritdoc/>
 		public IPastMeetings PastMeetings { get; private set; }
 
-		/// <summary>
-		/// Gets the resource which allows you to manage webinars that occured in the past.
-		/// </summary>
-		/// <value>
-		/// The past webinars resource.
-		/// </value>
+		/// <inheritdoc/>
 		public IPastWebinars PastWebinars { get; private set; }
-
-		/// <summary>
-		/// Gets the resource which allows you to manage roles.
-		/// </summary>
-		/// <value>
-		/// The roles resource.
-		/// </value>
-		public IRoles Roles { get; private set; }
-
-		/// <summary>
-		/// Gets the resource which allows you to manage users.
-		/// </summary>
-		/// <value>
-		/// The users resource.
-		/// </value>
-		public IUsers Users { get; private set; }
-
-		/// <summary>
-		/// Gets the resource which allows you to manage webinars.
-		/// </summary>
-		/// <value>
-		/// The webinars resource.
-		/// </value>
-		public IWebinars Webinars { get; private set; }
-
-		/// <summary>
-		/// Gets the resource which allows you to view metrics.
-		/// </summary>
-		public IDashboards Dashboards { get; private set; }
-
-		/// <summary>
-		/// Gets the resource which allows you to view reports.
-		/// </summary>
-		public IReports Reports { get; private set; }
-
-		/// <summary>
-		/// Gets the resource which allows you to manage call logs.
-		/// </summary>
-		public ICallLogs CallLogs { get; private set; }
-
-		/// <summary>
-		/// Gets the resource which allows you to manage chatbot messages.
-		/// </summary>
-		public IChatbot Chatbot { get; private set; }
 
 		/// <inheritdoc/>
 		public IPhone Phone { get; private set; }
 
 		/// <inheritdoc/>
+		public IReports Reports { get; private set; }
+
+		/// <inheritdoc/>
+		public IRoles Roles { get; private set; }
+
+		/// <inheritdoc/>
 		public ISms Sms { get; private set; }
+
+		/// <inheritdoc/>
+		public IUsers Users { get; private set; }
+
+		/// <inheritdoc/>
+		public IWebinars Webinars { get; private set; }
 
 		/// <summary>
 		/// Gets the resource that allows you to manage groups.
@@ -276,23 +217,23 @@ namespace ZoomNet
 			_fluentClient.Filters.Add(new ZoomErrorHandler());
 
 			Accounts = new Accounts(_fluentClient);
+			CallLogs = new CallLogs(_fluentClient);
 			Chat = new Chat(_fluentClient);
+			Chatbot = new Chatbot(_fluentClient);
 			CloudRecordings = new CloudRecordings(_fluentClient);
 			Contacts = new Contacts(_fluentClient);
+			Dashboards = new Dashboards(_fluentClient);
 			DataCompliance = new DataCompliance(_fluentClient);
+			Groups = new Groups(_fluentClient);
 			Meetings = new Meetings(_fluentClient);
 			PastMeetings = new PastMeetings(_fluentClient);
 			PastWebinars = new PastWebinars(_fluentClient);
+			Phone = new Phone(_fluentClient);
+			Reports = new Reports(_fluentClient);
 			Roles = new Roles(_fluentClient);
+			Sms = new Sms(_fluentClient);
 			Users = new Users(_fluentClient);
 			Webinars = new Webinars(_fluentClient);
-			Dashboards = new Dashboards(_fluentClient);
-			Reports = new Reports(_fluentClient);
-			CallLogs = new CallLogs(_fluentClient);
-			Chatbot = new Chatbot(_fluentClient);
-			Phone = new Phone(_fluentClient);
-			Sms = new Sms(_fluentClient);
-			Groups = new Groups(_fluentClient);
 		}
 
 		/// <summary>
@@ -310,9 +251,26 @@ namespace ZoomNet
 
 		#region PUBLIC METHODS
 
-		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-		/// </summary>
+		/// <inheritdoc/>
+		public bool HasPermissions(IEnumerable<string> scopes)
+		{
+			var tokenHandler = _fluentClient.Filters.OfType<OAuthTokenHandler>().SingleOrDefault();
+			if (tokenHandler == null) throw new Exception("The concept of scopes only applies when using an OAuth connection.");
+
+			// Ensure the token (and by extension the scopes) is not expired
+			tokenHandler.RefreshTokenIfNecessary(false);
+
+			// The list of scopes can be empty if a previously issued token was specified when the OAuthConnectionInfo was instantiated.
+			// I am not aware of any way to fetch the list of scopes which would enable me to populate the list of scopes in the OAuthConnectionInfo.
+			// Therefore in this scenario the only workaround I can think of is to force the token to be refreshed.
+			var oAuthConnectionInfo = (OAuthConnectionInfo)tokenHandler.ConnectionInfo;
+			if (oAuthConnectionInfo.Scopes == null) tokenHandler.RefreshTokenIfNecessary(true); // Force the token to be refreshed wich will have the side-effect of populating the '.Scopes'
+
+			var missingScopes = scopes.Except(((OAuthConnectionInfo)tokenHandler.ConnectionInfo).Scopes).ToArray();
+			return !missingScopes.Any();
+		}
+
+		/// <inheritdoc/>
 		public void Dispose()
 		{
 			// Call 'Dispose' to release resources

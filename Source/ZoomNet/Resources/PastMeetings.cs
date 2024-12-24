@@ -6,22 +6,16 @@ using ZoomNet.Models;
 
 namespace ZoomNet.Resources
 {
-	/// <summary>
-	/// Allows you to manage meetings that occured in the past.
-	/// </summary>
-	/// <seealso cref="ZoomNet.Resources.IMeetings" />
-	/// <remarks>
-	/// See <a href="https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetings">Zoom documentation</a> for more information.
-	/// </remarks>
+	/// <inheritdoc/>
 	public class PastMeetings : IPastMeetings
 	{
-		private readonly Pathoschild.Http.Client.IClient _client;
+		private readonly IClient _client;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PastMeetings" /> class.
 		/// </summary>
 		/// <param name="client">The HTTP client.</param>
-		internal PastMeetings(Pathoschild.Http.Client.IClient client)
+		internal PastMeetings(IClient client)
 		{
 			_client = client;
 		}
@@ -51,14 +45,7 @@ namespace ZoomNet.Resources
 				.AsPaginatedResponseWithToken<Participant>("participants");
 		}
 
-		/// <summary>
-		/// Get a list of ended meeting instance.
-		/// </summary>
-		/// <param name="meetingId">The meeting identifier.</param>
-		/// <param name="cancellationToken">The cancellation token.</param>
-		/// <returns>
-		/// An array of <see cref="PastInstance" />.
-		/// </returns>
+		/// <inheritdoc/>
 		public Task<PastInstance[]> GetInstancesAsync(long meetingId, CancellationToken cancellationToken = default)
 		{
 			return _client
@@ -67,14 +54,7 @@ namespace ZoomNet.Resources
 				.AsObject<PastInstance[]>("meetings");
 		}
 
-		/// <summary>
-		/// Get a list of poll results for a meeting that occured in the past.
-		/// </summary>
-		/// <param name="meetingId">The meeting identifier.</param>
-		/// <param name="cancellationToken">The cancellation token.</param>
-		/// <returns>
-		/// An array of <see cref="PollResult" />.
-		/// </returns>
+		/// <inheritdoc/>
 		public Task<PollResult[]> GetPollResultsAsync(long meetingId, CancellationToken cancellationToken = default)
 		{
 			return _client
@@ -83,17 +63,7 @@ namespace ZoomNet.Resources
 				.AsObject<PollResult[]>("questions");
 		}
 
-		/// <summary>
-		/// Get a list of files sent via in-meeting chat during a meeting.
-		/// </summary>
-		/// <remarks>
-		/// The in-meeting files are deleted after 24 hours of the meeting completion time.
-		/// </remarks>
-		/// <param name="meetingId">The meeting identifier.</param>
-		/// <param name="cancellationToken">The cancellation token.</param>
-		/// <returns>
-		/// An array of <see cref="MeetingFile" />.
-		/// </returns>
+		/// <inheritdoc/>
 		[Obsolete("This method has been deprecated and is no longer supported due to GCM encryption updates for security purposes")]
 		public Task<MeetingFile[]> GetFilesAsync(long meetingId, CancellationToken cancellationToken = default)
 		{
