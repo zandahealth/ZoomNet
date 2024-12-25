@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net48;netstandard2.1;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0;</TargetFrameworks>
     <LangVersion>preview</LangVersion>
     <PlatformTarget>anycpu</PlatformTarget>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -74,23 +74,6 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>$(SolutionDir)StyleCopRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\net7.0\</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)obj\$(Configuration)\net7.0\</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\net6.0\</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)obj\$(Configuration)\net6.0\</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\netstandard2.1\</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)obj\$(Configuration)\netstandard2.1\</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
-    <OutputPath>$(SolutionDir)bin\$(Configuration)\net48\</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)obj\$(Configuration)\net48\</IntermediateOutputPath>
   </PropertyGroup>
 
 </Project>
