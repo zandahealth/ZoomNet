@@ -121,11 +121,6 @@ namespace ZoomNet
 		/// <inheritdoc/>
 		public IWebinars Webinars { get; private set; }
 
-		/// <summary>
-		/// Gets the resource that allows you to manage groups.
-		/// </summary>
-		public IGroups Groups { get; private set; }
-
 		#endregion
 
 		#region CTOR
