@@ -96,7 +96,9 @@ namespace ZoomNet.IntegrationTests
 			var arrayAttributes = string.Join("\r\n", typesSortedAlphabetically.Where(t => !string.IsNullOrEmpty(t.JsonSerializeAttributeArray)).Select(t => t.JsonSerializeAttributeArray));
 			var nullableAttributes = string.Join("\r\n", typesSortedAlphabetically.Where(t => !string.IsNullOrEmpty(t.JsonSerializeAttributeNullable)).Select(t => t.JsonSerializeAttributeNullable));
 
-			var result = string.Join("\r\n\r\n", [simpleAttributes, arrayAttributes, nullableAttributes]);
+			string[] attributes = { simpleAttributes, arrayAttributes, nullableAttributes };
+
+			var result = string.Join("\r\n\r\n", attributes);
 			return result;
 		}
 	}
