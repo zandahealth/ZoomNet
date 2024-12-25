@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net48;net9.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>ZoomNet.UnitTests</AssemblyName>
     <RootNamespace>ZoomNet.UnitTests</RootNamespace>
     <IsPackable>false</IsPackable>
