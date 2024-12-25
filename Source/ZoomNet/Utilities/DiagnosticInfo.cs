@@ -117,10 +117,7 @@ namespace ZoomNet.Utilities
 
 			if (request != null)
 			{
-				logParams.Add(request.Method.Method);
-				logParams.Add(request.RequestUri);
-				logParams.Add(request.Version);
-
+				logParams.AddRange([request.Method.Method, request.RequestUri, request.Version]);
 				logParams.AddRange(requestHeaders
 						.OrderBy(kvp => kvp.Key)
 						.Select(kvp => kvp.Key.Equals("authorization", StringComparison.OrdinalIgnoreCase) ? "... omitted for security reasons ..." : string.Join(", ", kvp.Value))
@@ -130,9 +127,7 @@ namespace ZoomNet.Utilities
 
 			if (response != null)
 			{
-				logParams.Add(response.Version);
-				logParams.Add((int)response.StatusCode);
-				logParams.Add(response.ReasonPhrase);
+				logParams.AddRange([response.Version, (int)response.StatusCode, response.ReasonPhrase]);
 				logParams.AddRange(responseHeaders
 						.OrderBy(kvp => kvp.Key)
 						.Select(kvp => kvp.Key.Equals("authorization", StringComparison.OrdinalIgnoreCase) ? "... omitted for security reasons ..." : string.Join(", ", kvp.Value))
