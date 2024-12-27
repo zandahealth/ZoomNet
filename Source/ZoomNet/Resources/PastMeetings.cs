@@ -3,6 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ZoomNet.Models;
+using ZoomNet.Utilities;
 
 namespace ZoomNet.Resources
 {
@@ -24,7 +25,7 @@ namespace ZoomNet.Resources
 		public Task<PastMeeting> GetAsync(string meetingId, CancellationToken cancellationToken = default)
 		{
 			return _client
-				.GetAsync($"past_meetings/{meetingId}")
+				.GetAsync($"past_meetings/{Utils.DoubleEncode(meetingId)}")
 				.WithCancellationToken(cancellationToken)
 				.AsObject<PastMeeting>();
 		}
@@ -38,7 +39,7 @@ namespace ZoomNet.Resources
 			}
 
 			return _client
-				.GetAsync($"past_meetings/{meetingId}/participants")
+				.GetAsync($"past_meetings/{Utils.DoubleEncode(meetingId)}/participants")
 				.WithArgument("page_size", recordsPerPage)
 				.WithArgument("next_page_token", pagingToken)
 				.WithCancellationToken(cancellationToken)
