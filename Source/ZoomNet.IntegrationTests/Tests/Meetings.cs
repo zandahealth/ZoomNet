@@ -58,7 +58,7 @@ namespace ZoomNet.IntegrationTests.Tests
 				ApprovalType = ApprovalType.Manual,
 				JoinBeforeHost = true,
 				JoinBeforeHostTime = JoinBeforeHostTime.FiveMinutes,
-				UsePmi = true,
+				UsePmi = false,
 			};
 			var trackingFields = new Dictionary<string, string>()
 			{
@@ -185,7 +185,7 @@ namespace ZoomNet.IntegrationTests.Tests
 				await log.WriteLineAsync($"Registration {registrant1.Id} was deleted").ConfigureAwait(false);
 
 				await client.Meetings.DeleteRegistrantAsync(scheduledMeeting.Id, registrantInfo2.Id, null, cancellationToken).ConfigureAwait(false);
-				await log.WriteLineAsync($"Registration {registrant1.Id} was deleted").ConfigureAwait(false);
+				await log.WriteLineAsync($"Registration {registrantInfo2.Id} was deleted").ConfigureAwait(false);
 
 				var surveyQuestions = new[]
 				{

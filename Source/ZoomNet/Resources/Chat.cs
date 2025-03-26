@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using ZoomNet.Models;
+using ZoomNet.Utilities;
 
 namespace ZoomNet.Resources
 {
@@ -29,10 +30,7 @@ namespace ZoomNet.Resources
 		/// <inheritdoc/>
 		public Task<PaginatedResponseWithToken<ChatChannel>> GetAccountChannelsForUserAsync(string userId, int recordsPerPage = 30, string pagingToken = null, CancellationToken cancellationToken = default)
 		{
-			if (recordsPerPage < 1 || recordsPerPage > 300)
-			{
-				throw new ArgumentOutOfRangeException(nameof(recordsPerPage), "Records per page must be between 1 and 300");
-			}
+			Utils.ValidateRecordPerPage(recordsPerPage);
 
 			return _client
 				.GetAsync($"chat/users/{userId}/channels")
@@ -117,10 +115,7 @@ namespace ZoomNet.Resources
 		/// <inheritdoc/>
 		public Task<PaginatedResponseWithToken<ChatChannelMember>> GetAccountChannelMembersAsync(string userId, string channelId, int recordsPerPage = 30, string pagingToken = null, CancellationToken cancellationToken = default)
 		{
-			if (recordsPerPage < 1 || recordsPerPage > 300)
-			{
-				throw new ArgumentOutOfRangeException(nameof(recordsPerPage), "Records per page must be between 1 and 300");
-			}
+			Utils.ValidateRecordPerPage(recordsPerPage);
 
 			return _client
 				.GetAsync($"chat/users/{userId}/channels/{channelId}/members")
@@ -131,10 +126,10 @@ namespace ZoomNet.Resources
 		}
 
 		/// <inheritdoc/>
-		public Task<string[]> InviteMembersToAccountChannelAsync(string userId, string channelId, IEnumerable<string> emails, CancellationToken cancellationToken = default)
+		public Task<ChatMembersEditResult> InviteMembersToAccountChannelAsync(string userId, string channelId, IEnumerable<string> emails, CancellationToken cancellationToken = default)
 		{
 			if (emails == null || !emails.Any()) throw new ArgumentNullException(nameof(emails), "You must specify at least one member to invite");
-			if (emails.Count() > 5) throw new ArgumentOutOfRangeException(nameof(emails), "You can invite up to 5 members at once");
+			if (emails.Count() > 20) throw new ArgumentOutOfRangeException(nameof(emails), "You can invite up to 20 members at once");
 
 			var data = new JsonObject
 			{
@@ -145,7 +140,7 @@ namespace ZoomNet.Resources
 				.PostAsync($"chat/users/{userId}/channels/{channelId}/members")
 				.WithJsonBody(data)
 				.WithCancellationToken(cancellationToken)
-				.AsObject<string[]>("ids");
+				.AsObject<ChatMembersEditResult>();
 		}
 
 		/// <inheritdoc/>
@@ -153,6 +148,50 @@ namespace ZoomNet.Resources
 		{
 			return _client
 				.DeleteAsync($"chat/users/{userId}/channels/{channelId}/members/{memberId}")
+				.WithCancellationToken(cancellationToken)
+				.AsMessage();
+		}
+
+		/// <inheritdoc/>
+		public Task<ChatMembersEditResult> PromoteMembersInAccountChannelByEmailAsync(string userId, string channelId, IEnumerable<string> emails, CancellationToken cancellationToken = default)
+		{
+			if (emails == null || !emails.Any()) throw new ArgumentNullException(nameof(emails), "You must specify at least one member to invite");
+			if (emails.Count() > 10) throw new ArgumentOutOfRangeException(nameof(emails), "You can promote up to 10 members at once");
+
+			var data = new JsonObject
+			{
+				{ "admins", emails.Select(e => new JsonObject() { { "email", e } }).ToArray() }
+			};
+
+			return _client
+				.PostAsync($"chat/users/{userId}/channels/{channelId}/admins")
+				.WithJsonBody(data)
+				.WithCancellationToken(cancellationToken)
+				.AsObject<ChatMembersEditResult>();
+		}
+
+		/// <inheritdoc/>
+		public Task DemoteAdminsInAccountChannelByIdAsync(string userId, string channelId, IEnumerable<string> adminIds, CancellationToken cancellationToken = default)
+		{
+			if (adminIds == null || !adminIds.Any()) throw new ArgumentNullException(nameof(adminIds), "You must specify at least one admin to demote");
+			if (adminIds.Count() > 10) throw new ArgumentOutOfRangeException(nameof(adminIds), "You can demote up to 10 admins at once");
+
+			return _client
+				.DeleteAsync($"chat/users/{userId}/channels/{channelId}/admins")
+				.WithArgument("admin_ids", string.Join(",", adminIds))
+				.WithCancellationToken(cancellationToken)
+				.AsMessage();
+		}
+
+		/// <inheritdoc/>
+		public Task DemoteAdminsInAccountChannelByUserIdAsync(string userId, string channelId, IEnumerable<string> userIds, CancellationToken cancellationToken = default)
+		{
+			if (userIds == null || !userIds.Any()) throw new ArgumentNullException(nameof(userIds), "You must specify at least one user to demote");
+			if (userIds.Count() > 10) throw new ArgumentOutOfRangeException(nameof(userIds), "You can demote up to 10 users at once");
+
+			return _client
+				.DeleteAsync($"chat/users/{userId}/channels/{channelId}/admins")
+				.WithArgument("user_ids", string.Join(",", userIds))
 				.WithCancellationToken(cancellationToken)
 				.AsMessage();
 		}
@@ -263,7 +302,7 @@ namespace ZoomNet.Resources
 				.PostAsync($"https://file.zoom.us/v2/chat/users/{userId}/messages/files")
 				.WithBody(bodyBuilder =>
 				{
-					// The file name as well as the name of the other 'parts' in the request must be quoted otherwise the Zoom API would return the following error message: Invalid 'Content-Disposition' in multipart form
+					// The file name as well as the name of the other 'parts' in the request must be quoted otherwise the Zoom API returns the following error message: Invalid 'Content-Disposition' in multipart form
 					var content = new MultipartFormDataContent
 					{
 						{ new StreamContent(fileData), "files", $"\"{fileName}\"" }
@@ -285,7 +324,7 @@ namespace ZoomNet.Resources
 				.PostAsync($"https://file.zoom.us/v2/chat/users/{userId}/files")
 				.WithBody(bodyBuilder =>
 				{
-					// The file name must be quoted otherwise the Zoom API would return the following error message: Invalid 'Content-Disposition' in multipart form
+					// The file name must be quoted otherwise the Zoom API returns the following error message: Invalid 'Content-Disposition' in multipart form
 					var content = new MultipartFormDataContent
 					{
 						{ new StreamContent(fileData), "file", $"\"{fileName}\"" }
@@ -320,10 +359,7 @@ namespace ZoomNet.Resources
 			Debug.Assert(recipientEmail != null || channelId != null, "You must provide either recipientEmail or channelId");
 			Debug.Assert(recipientEmail == null || channelId == null, "You can't provide both recipientEmail and channelId");
 
-			if (recordsPerPage < 1 || recordsPerPage > 300)
-			{
-				throw new ArgumentOutOfRangeException(nameof(recordsPerPage), "Records per page must be between 1 and 300");
-			}
+			Utils.ValidateRecordPerPage(recordsPerPage);
 
 			return _client
 				.GetAsync($"chat/users/{userId}/messages")

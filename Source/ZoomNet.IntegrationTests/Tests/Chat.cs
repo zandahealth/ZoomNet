@@ -24,7 +24,7 @@ namespace ZoomNet.IntegrationTests.Tests
 				.Where(m => m.Name.StartsWith("ZoomNet Integration Testing:"))
 				.Select(async oldChannel =>
 				{
-					await client.Chat.DeleteChannelAsync(oldChannel.Id, cancellationToken).ConfigureAwait(false);
+					await client.Chat.DeleteAccountChannelAsync(myUser.Id, oldChannel.Id, cancellationToken).ConfigureAwait(false);
 					await log.WriteLineAsync($"Channel {oldChannel.Id} deleted").ConfigureAwait(false);
 					await Task.Delay(1000, cancellationToken).ConfigureAwait(false);    // Brief pause to ensure Zoom has time to catch up
 				});
@@ -45,6 +45,16 @@ namespace ZoomNet.IntegrationTests.Tests
 			// RETRIEVE THE CHANNEL MEMBERS
 			var paginatedMembers = await client.Chat.GetAccountChannelMembersAsync(myUser.Id, channel.Id, 10, null, cancellationToken).ConfigureAwait(false);
 			await log.WriteLineAsync($"Account channel \"{channel.Id}\" has {paginatedMembers.TotalRecords} members").ConfigureAwait(false);
+
+			// PROMOTE MEMBER TO ADMIN
+			var memberToPromoteEmail = paginatedMembers.Records.LastOrDefault().Email;
+			var chatMemberPromotion = await client.Chat.PromoteMemberInAccountChannelByEmailAsync(myUser.Id, channel.Id, memberToPromoteEmail, cancellationToken).ConfigureAwait(false);
+			await log.WriteLineAsync("Member was promoted").ConfigureAwait(false);
+
+			// DEMOTE ADMIN TO MEMBER
+			var memberIdToDemote = chatMemberPromotion.MemberIds.First();
+			await client.Chat.DemoteAdminInAccountChannelByUserIdAsync(myUser.Id, channel.Id, memberIdToDemote, cancellationToken);
+			await log.WriteLineAsync("Member was demoted").ConfigureAwait(false);
 
 			// SEND A MESSAGE TO THE CHANNEL
 			var messageId = await client.Chat.SendMessageToChannelAsync(channel.Id, "This is a test from integration test", null, null, null, cancellationToken).ConfigureAwait(false);

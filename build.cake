@@ -1,9 +1,9 @@
 // Install tools.
 #tool dotnet:?package=GitVersion.Tool&version=6.1.0
 #tool dotnet:?package=coveralls.net&version=4.0.1
-#tool nuget:https://f.feedz.io/jericho/jericho/nuget/?package=GitReleaseManager&version=0.17.0-collaborators0008
-#tool nuget:?package=ReportGenerator&version=5.4.1
-#tool nuget:?package=xunit.runner.console&version=2.9.2
+#tool nuget:?package=GitReleaseManager&version=0.19.0
+#tool nuget:?package=ReportGenerator&version=5.4.4
+#tool nuget:?package=xunit.runner.console&version=2.9.3
 #tool nuget:?package=CodecovUploader&version=0.8.0
 
 // Install addins.
@@ -63,7 +63,7 @@ var sourceFolder = "./Source/";
 var outputDir = "./artifacts/";
 var codeCoverageDir = $"{outputDir}CodeCoverage/";
 var benchmarkDir = $"{outputDir}Benchmark/";
-var coverageFile = $"{codeCoverageDir}coverage.{DefaultFramework}.xml";
+var coverageFile = $"{codeCoverageDir}coverage.{DEFAULT_FRAMEWORK}.xml";
 
 var solutionFile = $"{sourceFolder}{libraryName}.sln";
 var sourceProject = $"{sourceFolder}{libraryName}/{libraryName}.csproj";
@@ -86,23 +86,23 @@ var isTagged = BuildSystem.AppVeyor.Environment.Repository.Tag.IsTag && !string.
 var isIntegrationTestsProjectPresent = FileExists(integrationTestsProject);
 var isUnitTestsProjectPresent = FileExists(unitTestsProject);
 var isBenchmarkProjectPresent = FileExists(benchmarkProject);
-var removeIntegrationTests = isIntegrationTestsProjectPresent && (!isLocalBuild || target == "coverage");
-var removeBenchmarks = isBenchmarkProjectPresent && (!isLocalBuild || target == "coverage");
+var isCodeCoverageTarget = target.Equals("Coverage", StringComparison.OrdinalIgnoreCase) ||
+	target.Equals("Run-Code-Coverage", StringComparison.OrdinalIgnoreCase) ||
+	target.Equals("Generate-Code-Coverage-Report", StringComparison.OrdinalIgnoreCase) ||
+	target.Equals("Upload-Coverage-Result", StringComparison.OrdinalIgnoreCase);
+var removeIntegrationTests = isIntegrationTestsProjectPresent && (!isLocalBuild || isCodeCoverageTarget);
+var removeBenchmarks = isBenchmarkProjectPresent && (!isLocalBuild || isCodeCoverageTarget);
 
 var publishingError = false;
 
-// Generally speaking, we want to honor all the TFM configured in the source project and the unit test project.
-// However, there are a few scenarios where a single framework is sufficient. Here are a few examples that come to mind:
-// - when building source project on Ubuntu
-// - when running unit tests on Ubuntu
-// - when calculating code coverage
-const string DefaultFramework = "net9.0";
-var isSingleTfmMode = !IsRunningOnWindows() ||
-		target.Equals("Coverage", StringComparison.OrdinalIgnoreCase) ||
-		target.Equals("Run-Code-Coverage", StringComparison.OrdinalIgnoreCase) ||
-		target.Equals("Generate-Code-Coverage-Report", StringComparison.OrdinalIgnoreCase) ||
-		target.Equals("Upload-Coverage-Result", StringComparison.OrdinalIgnoreCase);
-var desiredFramework = isSingleTfmMode ? DefaultFramework : null;
+// Generally speaking, we want to honor all the TFM configured in the unit tests, integration tests and benchmark projects.
+// However, a single framework is sufficient when calculating code coverage.
+const string DEFAULT_FRAMEWORK = "net9.0";
+var isSingleTfmMode = (IsRunningOnWindows() && !isLocalBuild) || isCodeCoverageTarget;
+
+// The terminal logger introduced but turned off by default in .NET8 and turned on by default in .NET9 doesn't work right on Linux
+// and causes a lot of noise in the build log on Ubuntu in AppVeyor.
+var terminalLogger = IsRunningOnWindows() ? "on" : "off";
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,9 +159,13 @@ Setup(context =>
 		);
 	}
 
+	// In single TFM mode we want to override the framework(s) with our desired framework
+	if (isSingleTfmMode && isUnitTestsProjectPresent) 
+	{
+		Context.UpdateProjectTarget(unitTestsProject, DEFAULT_FRAMEWORK);
+	}
+
 	// Integration tests are intended to be used for debugging purposes and not intended to be executed in CI environment.
-	// Also, the runner for these tests contains windows-specific code (such as resizing window, moving window to center of screen, etc.)
-	// which can cause problems when attempting to run unit tests on an Ubuntu image on AppVeyor.
 	if (removeIntegrationTests)
 	{
 		Information("");
@@ -169,47 +173,29 @@ Setup(context =>
 		DotNetTool(solutionFile, "sln", $"remove {integrationTestsProject.TrimStart(sourceFolder, StringComparison.OrdinalIgnoreCase)}");
 	}
 
-	// Similarly, benchmarking can causes problems similar to this one:
-	// error NETSDK1005: Assets file '/home/appveyor/projects/stronggrid/Source/StrongGrid.Benchmark/obj/project.assets.json' doesn't have a target for 'net5.0'.
-	// Ensure that restore has run and that you have included 'net5.0' in the TargetFrameworks for your project.
+	// Similarly, benchmarks are not intended to be executed in CI environment.
 	if (removeBenchmarks)
 	{
 		Information("");
 		Information("Removing benchmark project");
 		DotNetTool(solutionFile, "sln", $"remove {benchmarkProject.TrimStart(sourceFolder, StringComparison.OrdinalIgnoreCase)}");
 	}
-
-	// In single TFM mode we want to override the framework(s) with our desired framework
-	if (isSingleTfmMode)
-	{
-		var peekSettings = new XmlPeekSettings { SuppressWarning = true };
-		foreach(var projectFile in GetFiles("./Source/**/*.csproj"))
-		{
-			Information("Updating TFM in: {0}", projectFile.ToString());
-			if (XmlPeek(projectFile, "/Project/PropertyGroup/TargetFramework", peekSettings) != null) XmlPoke(projectFile, "/Project/PropertyGroup/TargetFramework", desiredFramework);
-			if (XmlPeek(projectFile, "/Project/PropertyGroup/TargetFrameworks", peekSettings) != null) XmlPoke(projectFile, "/Project/PropertyGroup/TargetFrameworks", desiredFramework);
-		}
-	}
 });
 
 Teardown(context =>
 {
-	if (removeIntegrationTests || removeBenchmarks)
+	if (isSingleTfmMode)
 	{
-		Information("Restoring projects that may have been removed during build script setup");
-		GitCheckout(".", new FilePath[] { solutionFile });
-		Information("  Restored {0}", solutionFile.ToString());
+		Information("Restoring project files that were modified during build script setup");
+		GitCheckout(".", GetFiles("./Source/**/*.csproj").ToArray());
 		Information("");
 	}
 
-	if (isSingleTfmMode)
+	if (removeIntegrationTests || removeBenchmarks)
 	{
-		Information("Restoring project files that may have been modified during build script setup");
-		foreach(var projectFile in GetFiles("./Source/**/*.csproj"))
-		{
-			GitCheckout(".", new FilePath[] { projectFile });
-			Information("  Restored {0}", projectFile.ToString());
-		}
+		Information("Restoring the solution file which was modified during build script setup");
+		GitCheckout(".", new FilePath[] { solutionFile });
+		Information("  Restored {0}", solutionFile.ToString());
 		Information("");
 	}
 
@@ -257,9 +243,12 @@ Task("Restore-NuGet-Packages")
 {
 	DotNetRestore("./Source/", new DotNetRestoreSettings
 	{
-		Sources = new [] {
+		Sources = new []
+		{
 			"https://api.nuget.org/v3/index.json",
-		}
+		},
+		ArgumentCustomization = args => args
+			.Append($"-tl:{terminalLogger}")
 	});
 });
 
@@ -270,7 +259,6 @@ Task("Build")
 	DotNetBuild(solutionFile, new DotNetBuildSettings
 	{
 		Configuration = configuration,
-		Framework =  desiredFramework,
 		NoRestore = true,
 		MSBuildSettings = new DotNetMSBuildSettings
 		{
@@ -279,7 +267,9 @@ Task("Build")
 			FileVersion = versionInfo.MajorMinorPatch,
 			InformationalVersion = versionInfo.InformationalVersion,
 			ContinuousIntegrationBuild = true
-		}
+		},
+		ArgumentCustomization = args => args
+			.Append($"-tl:{terminalLogger}")
 	});
 });
 
@@ -293,7 +283,8 @@ Task("Run-Unit-Tests")
 		NoBuild = true,
 		NoRestore = true,
 		Configuration = configuration,
-		Framework = desiredFramework
+		ArgumentCustomization = args => args
+			.Append($"-tl:{terminalLogger}")
 	});
 });
 
@@ -307,10 +298,10 @@ Task("Run-Code-Coverage")
 		NoBuild = true,
 		NoRestore = true,
 		Configuration = configuration,
-		Framework = DefaultFramework,
 
 		// The following assumes that coverlet.msbuild has been added to the unit testing project
 		ArgumentCustomization = args => args
+			.Append($"-tl:{terminalLogger}")
 			.Append("/p:CollectCoverage=true")
 			.Append("/p:CoverletOutputFormat=opencover")
 			.Append($"/p:CoverletOutput={MakeAbsolute(Directory(codeCoverageDir))}/coverage.xml")	// The name of the framework will be inserted between "coverage" and "xml". This is important to know when uploading the XML file to coveralls/codecov and when generating the HTML report
@@ -318,6 +309,7 @@ Task("Run-Code-Coverage")
 			.Append($"/p:ExcludeByFile={string.Join("%2c", testCoverageExcludeFiles)}")
 			.Append($"/p:Exclude={string.Join("%2c", testCoverageFilters.Where(filter => filter.StartsWith("-")).Select(filter => filter.TrimStart("-", StringComparison.OrdinalIgnoreCase)))}")
 			.Append($"/p:Include={string.Join("%2c", testCoverageFilters.Where(filter => filter.StartsWith("+")).Select(filter => filter.TrimStart("+", StringComparison.OrdinalIgnoreCase)))}")
+			.Append("/p:ExcludeAssembliesWithoutSources=MissingAll")
 			.Append("/p:SkipAutoProps=true")
     };
 
@@ -401,7 +393,9 @@ Task("Create-NuGet-Package")
 		{
 			PackageReleaseNotes = releaseNotesUrl,
 			PackageVersion = versionInfo.FullSemVer.Replace('+', '-')
-		}
+		},
+		ArgumentCustomization = args => args
+			.Append($"-tl:{terminalLogger}")
 	};
 
 	DotNetPack(sourceProject, settings);
@@ -436,7 +430,9 @@ Task("Publish-NuGet")
 	var settings = new DotNetNuGetPushSettings
 	{
     	Source = nuGetApiUrl,
-	    ApiKey = nuGetApiKey
+	    ApiKey = nuGetApiKey,
+		ArgumentCustomization = args => args
+			.Append($"-tl:{terminalLogger}")
 	};
 
 	foreach(var package in GetFiles(outputDir + "*.nupkg"))
@@ -496,7 +492,9 @@ Task("Generate-Benchmark-Report")
         Configuration = configuration,
 		NoRestore = true,
         NoBuild = true,
-        OutputDirectory = publishDirectory
+        OutputDirectory = publishDirectory,
+		ArgumentCustomization = args => args
+			.Append($"-tl:{terminalLogger}")
     });
 
 	using (DiagnosticVerbosity())
@@ -622,7 +620,7 @@ private static string GetBuildBranch(this ICakeContext context)
     return repositoryBranch;
 }
 
-public static string GetRepoName(this ICakeContext context)
+private static string GetRepoName(this ICakeContext context)
 {
     var buildSystem = context.BuildSystem();
 
@@ -634,4 +632,15 @@ public static string GetRepoName(this ICakeContext context)
 	var originUrl = ExecGitCmd(context, "config --get remote.origin.url").Single();
 	var parts = originUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
 	return $"{parts[parts.Length - 2]}/{parts[parts.Length - 1].Replace(".git", "")}";
+}
+
+private static void UpdateProjectTarget(this ICakeContext context, string path, string desiredTarget)
+{
+	var peekSettings = new XmlPeekSettings { SuppressWarning = true };
+	foreach(var projectFile in context.GetFiles(path))
+	{
+		context.Information("Updating TFM in: {0}", projectFile.ToString());
+		if (context.XmlPeek(projectFile, "/Project/PropertyGroup/TargetFramework", peekSettings) != null) context.XmlPoke(projectFile, "/Project/PropertyGroup/TargetFramework", desiredTarget);
+		if (context.XmlPeek(projectFile, "/Project/PropertyGroup/TargetFrameworks", peekSettings) != null) context.XmlPoke(projectFile, "/Project/PropertyGroup/TargetFrameworks", desiredTarget);
+	}
 }

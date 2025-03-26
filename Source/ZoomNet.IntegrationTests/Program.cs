@@ -2,6 +2,7 @@ using Formitable.BetterStack.Logger.Microsoft;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using System;
 using System.Linq;
 using System.Threading;
@@ -13,7 +14,7 @@ namespace ZoomNet.IntegrationTests
 	{
 		public static async Task Main()
 		{
-			//var serializerContext = GenerateAttributesForSerializerContext();
+			var serializerContext = GenerateAttributesForSerializerContext();
 
 			// Configure cancellation (this allows you to press CTRL+C or CTRL+Break to stop the integration tests)
 			var cts = new CancellationTokenSource();
@@ -33,7 +34,6 @@ namespace ZoomNet.IntegrationTests
 		private static void ConfigureServices(ServiceCollection services)
 		{
 			services.AddHostedService<TestsRunner>();
-
 
 			services
 				.AddLogging(logging =>
@@ -55,7 +55,8 @@ namespace ZoomNet.IntegrationTests
 						options.TimestampFormat = "yyyy-MM-dd HH:mm:ss ";
 					});
 
-					logging.AddFilter("*", LogLevel.Debug);
+					logging.AddFilter(logLevel => logLevel >= LogLevel.Debug);
+					logging.AddFilter<ConsoleLoggerProvider>(logLevel => logLevel >= LogLevel.Information);
 				});
 		}
 

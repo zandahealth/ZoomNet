@@ -10,9 +10,7 @@ namespace ZoomNet.UnitTests.Resources
 {
 	public class PhoneUserTests
 	{
-		#region constants
-
-		internal const string PHONE_USERS_PAGINATED_OBJECT = @"{
+		private const string PHONE_USERS_PAGINATED_OBJECT = @"{
 			""next_page_token"": ""F2qwertyg5eIqRRgC2YMauur8ZHUaJqtS3i"",
 			""page_size"": 1,
 			""total_records"": 10,
@@ -49,9 +47,12 @@ namespace ZoomNet.UnitTests.Resources
 			]
 		}";
 
-		#endregion
+		private readonly ITestOutputHelper _outputHelper;
 
-		#region tests
+		public PhoneUserTests(ITestOutputHelper outputHelper)
+		{
+			_outputHelper = outputHelper;
+		}
 
 		[Fact]
 		public async Task GetPhoneUsersPaginatedResponseTestsAsync()
@@ -68,12 +69,13 @@ namespace ZoomNet.UnitTests.Resources
 					"application/json",
 					PHONE_USERS_PAGINATED_OBJECT);
 
-			var client = Utils.GetFluentClient(mockHttp);
+			var logger = _outputHelper.ToLogger<IZoomClient>();
+			var client = Utils.GetFluentClient(mockHttp, logger: logger);
 			var phone = new Phone(client);
 
 			// Act
 			var result = await phone
-				.ListPhoneUsersAsync(pageSize: pageSize)
+				.ListPhoneUsersAsync(pageSize: pageSize, cancellationToken: TestContext.Current.CancellationToken)
 				.ConfigureAwait(true);
 
 			// Assert
@@ -97,18 +99,17 @@ namespace ZoomNet.UnitTests.Resources
 			// Arrange
 			var mockHttp = new MockHttpMessageHandler();
 
-			var client = Utils.GetFluentClient(mockHttp);
+			var logger = _outputHelper.ToLogger<IZoomClient>();
+			var client = Utils.GetFluentClient(mockHttp, logger: logger);
 			var phone = new Phone(client);
 
 			// Act and Assert
 			var exception = Assert.Throws<ArgumentOutOfRangeException>(() => phone
-				.ListPhoneUsersAsync(pageSize: pageSize)
+				.ListPhoneUsersAsync(pageSize: pageSize, cancellationToken: TestContext.Current.CancellationToken)
 				.ConfigureAwait(true));
 
 			exception.ParamName.ShouldBe(nameof(pageSize));
 			exception.Message.ShouldStartWith("Records per page must be between 1 and 100");
 		}
-
-		#endregion
 	}
 }
