@@ -111,6 +111,10 @@ namespace ZoomNet.Models
 		[EnumMember(Value = "BJ")]
 		Benin,
 
+		/// <summary>Saint Barthelemy.</summary>
+		[EnumMember(Value = "BL")]
+		Saint_Barthelemy,
+
 		/// <summary>Bermuda.</summary>
 		[EnumMember(Value = "BM")]
 		Bermuda,
@@ -122,6 +126,10 @@ namespace ZoomNet.Models
 		/// <summary>Bolivia.</summary>
 		[EnumMember(Value = "BO")]
 		Bolivia,
+
+		/// <summary>Bonaire, Sint Eustatius and Saba.</summary>
+		[EnumMember(Value = "BQ")]
+		Bonaire_Sint_Eustatius_and_Saba,
 
 		/// <summary>Brazil.</summary>
 		[EnumMember(Value = "BR")]
@@ -154,6 +162,10 @@ namespace ZoomNet.Models
 		/// <summary>Canada.</summary>
 		[EnumMember(Value = "CA")]
 		Canada,
+
+		/// <summary>Cocos (Keeling) Islands.</summary>
+		[EnumMember(Value = "CC")]
+		Cocos_Keeling_Islands,
 
 		/// <summary>The Democratic Republic of The Congo.</summary>
 		[EnumMember(Value = "CD")]
@@ -203,9 +215,21 @@ namespace ZoomNet.Models
 		[EnumMember(Value = "CS")]
 		Serbia_and_Montenegro,
 
+		/// <summary>Cuba.</summary>
+		[EnumMember(Value = "CU")]
+		Cuba,
+
 		/// <summary>Cape Verde.</summary>
 		[EnumMember(Value = "CV")]
 		Cape_Verde,
+
+		/// <summary>Curacao.</summary>
+		[EnumMember(Value = "CW")]
+		Curacao,
+
+		/// <summary>Christmas Island.</summary>
+		[EnumMember(Value = "CX")]
+		Christmas_Island,
 
 		/// <summary>Cyprus.</summary>
 		[EnumMember(Value = "CY")]
@@ -250,6 +274,10 @@ namespace ZoomNet.Models
 		/// <summary>Egypt.</summary>
 		[EnumMember(Value = "EG")]
 		Egypt,
+
+		/// <summary>Western Sahara.</summary>
+		[EnumMember(Value = "EH")]
+		Western_Sahara,
 
 		/// <summary>Eritrea.</summary>
 		[EnumMember(Value = "ER")]
@@ -367,6 +395,10 @@ namespace ZoomNet.Models
 		[EnumMember(Value = "HK")]
 		Hong_Kong,
 
+		/// <summary>Heard Island and McDonald Islands.</summary>
+		[EnumMember(Value = "HM")]
+		Heard_Island_and_McDonald_Islands,
+
 		/// <summary>Honduras.</summary>
 		[EnumMember(Value = "HN")]
 		Honduras,
@@ -410,6 +442,10 @@ namespace ZoomNet.Models
 		/// <summary>Iraq.</summary>
 		[EnumMember(Value = "IQ")]
 		Iraq,
+
+		/// <summary>Islamic Republic of Iran.</summary>
+		[EnumMember(Value = "IR")]
+		Islamic_Republic_of_Iran,
 
 		/// <summary>Iceland.</summary>
 		[EnumMember(Value = "IS")]
@@ -458,6 +494,10 @@ namespace ZoomNet.Models
 		/// <summary>Saint Kitts and Nevis.</summary>
 		[EnumMember(Value = "KN")]
 		Saint_Kitts_and_Nevis,
+
+		/// <summary>Democratic People's Republic of Korea.</summary>
+		[EnumMember(Value = "KP")]
+		Democratic_People_s_Republic_of_Korea,
 
 		/// <summary>Republic of Korea.</summary>
 		[EnumMember(Value = "KR")]
@@ -695,6 +735,10 @@ namespace ZoomNet.Models
 		[EnumMember(Value = "PM")]
 		Saint_Pierre_and_Miquelon,
 
+		/// <summary>Pitcairn.</summary>
+		[EnumMember(Value = "PN")]
+		Pitcairn,
+
 		/// <summary>Puerto Rico.</summary>
 		[EnumMember(Value = "PR")]
 		Puerto_Rico,
@@ -751,6 +795,10 @@ namespace ZoomNet.Models
 		[EnumMember(Value = "SC")]
 		Seychelles,
 
+		/// <summary>Sudan.</summary>
+		[EnumMember(Value = "SD")]
+		Sudan,
+
 		/// <summary>Sweden.</summary>
 		[EnumMember(Value = "SE")]
 		Sweden,
@@ -759,9 +807,17 @@ namespace ZoomNet.Models
 		[EnumMember(Value = "SG")]
 		Singapore,
 
+		/// <summary>Saint Helena, Ascension and Tristan da Cunha.</summary>
+		[EnumMember(Value = "SH")]
+		Saint_Helena_Ascension_and_Tristan_da_Cunha,
+
 		/// <summary>Slovenia.</summary>
 		[EnumMember(Value = "SI")]
 		Slovenia,
+
+		/// <summary>Svalbard and Jan Mayen.</summary>
+		[EnumMember(Value = "SJ")]
+		Svalbard_and_Jan_Mayen,
 
 		/// <summary>Slovakia.</summary>
 		[EnumMember(Value = "SK")]
@@ -798,6 +854,14 @@ namespace ZoomNet.Models
 		/// <summary>El Salvador.</summary>
 		[EnumMember(Value = "SV")]
 		El_Salvador,
+
+		/// <summary>Sint Maarten.</summary>
+		[EnumMember(Value = "SX")]
+		Sint_Maarten,
+
+		/// <summary>Syrian Arab Republic.</summary>
+		[EnumMember(Value = "SY")]
+		Syrian_Arab_Republic,
 
 		/// <summary>Swaziland.</summary>
 		[EnumMember(Value = "SZ")]
